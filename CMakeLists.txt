@@ -5,4 +5,6 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(2048GameC main.c
         logic.c
-        logic.h)
+        logic.h
+        utils.c
+        utils.h)

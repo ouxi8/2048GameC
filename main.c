@@ -23,7 +23,7 @@ int main() {
         input = tolower(input); // Normalize to lowercase
 
         // Determine the direction based on user input
-        game_direction_t action;
+        game_actions_t action;
         switch (input) {
             case 'w':
                 action = UP;
@@ -46,7 +46,7 @@ int main() {
         move(matrix, action);
 
         // Check game state after the move
-        state = getCurrentState(matrix);
+        state = checkWin(matrix);
 
         if (state == WIN) {
             printMatrix(matrix);

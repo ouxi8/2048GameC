@@ -7,14 +7,26 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "utils.h"
+
 #define NROWS 4
 #define NCOLS 4
+#define PERCENTAGE_FOR_4 20
 
-void swap(int *a, int *b) {
-    int aux = *a;
-    *a = *b;
-    *b = aux;
-}
+//----------------------------------------------------------------//
+static void addValue(int matrix[]);
+
+// Helper function to move and merge a row to the left
+static void shiftLeft(int row[]);
+
+static void mergeLeft(int row[]);
+
+// Core move function for each row to the left
+static void moveRowLeft(int row[]);
+
+//----------------------------------------------------------------//
+
+int score = 0;
 
 void initGame(int matrix[]) {
     srand(time(NULL));
@@ -25,7 +37,7 @@ void initGame(int matrix[]) {
     addValue(matrix); // Start game with two cells filled
 }
 
-game_state_t getCurrentState(int matrix[]) {
+game_state_t checkWin(const int matrix[]) {
     for (int i = 0; i < NROWS; i++) {
         for (int j = 0; j < NCOLS; j++) {
             int currentIndex = i * NCOLS + j;
@@ -38,7 +50,7 @@ game_state_t getCurrentState(int matrix[]) {
     return GAME_OVER;
 }
 
-void printMatrix(int matrix[]) {
+void printMatrix(const int matrix[]) {
     printf("\n-------------------------\n"); // Top border
 
     for (int i = 0; i < NROWS; i++) {
@@ -55,7 +67,46 @@ void printMatrix(int matrix[]) {
     printf("\n");
 }
 
-void addValue(int matrix[]) {
+
+void move(int matrix[], const game_actions_t action) {
+    switch (action) {
+        case LEFT:
+            for (int i = 0; i < NROWS; i++) {
+                moveRowLeft(&matrix[i * NCOLS]);
+            }
+            break;
+        case RIGHT:
+            reverseMatrix(matrix, NCOLS, NCOLS);
+            for (int i = 0; i < NROWS; i++) {
+                moveRowLeft(&matrix[i * NCOLS]);
+            }
+            reverseMatrix(matrix, NCOLS, NCOLS);
+            break;
+        case UP:
+            transposeMatrix(matrix, NCOLS, NCOLS);
+            for (int i = 0; i < NCOLS; i++) {
+                moveRowLeft(&matrix[i * NCOLS]);
+            }
+            transposeMatrix(matrix, NCOLS, NCOLS);
+            break;
+        case DOWN:
+            transposeMatrix(matrix, NCOLS, NCOLS);
+            reverseMatrix(matrix, NCOLS, NCOLS);
+            for (int i = 0; i < NCOLS; i++) {
+                moveRowLeft(&matrix[i * NCOLS]);
+            }
+            reverseMatrix(matrix, NCOLS, NCOLS);
+            transposeMatrix(matrix, NCOLS, NCOLS);
+            break;
+    }
+    addValue(matrix);
+}
+
+int getScore() {
+    return score;
+}
+
+static void addValue(int matrix[]) {
     int emptyCells[NROWS * NCOLS];
     int emptyCount = 0;
 
@@ -66,29 +117,13 @@ void addValue(int matrix[]) {
     }
 
     if (emptyCount > 0) {
-        int chosenIndex = emptyCells[rand() % emptyCount];
-        matrix[chosenIndex] = (rand() % 10 == 0) ? 4 : 2; // 10% chance to add a 4
-    }
-}
-
-void reverseMatrix(int matrix[]) {
-    for (int i = 0; i < NROWS; i++) {
-        for (int j = 0; j < NCOLS / 2; j++) {
-            swap(&matrix[i * NCOLS + j], &matrix[i * NCOLS + (NCOLS - 1 - j)]);
-        }
-    }
-}
-
-void transposeMatrix(int matrix[]) {
-    for (int i = 0; i < NROWS; i++) {
-        for (int j = i + 1; j < NCOLS; j++) {
-            swap(&matrix[i * NCOLS + j], &matrix[j * NCOLS + i]);
-        }
+        const int chosenIndex = emptyCells[rand() % emptyCount];
+        matrix[chosenIndex] = (rand() % PERCENTAGE_FOR_4 == 0) ? 4 : 2; // PERCENTAGE_FOR_4% chance to add a 4
     }
 }
 
 // Helper function to move and merge a row to the left
-void shiftLeft(int row[]) {
+static void shiftLeft(int row[]) {
     int insertPos = 0;
     for (int j = 0; j < NCOLS; j++) {
         if (row[j] != 0) {
@@ -100,7 +135,7 @@ void shiftLeft(int row[]) {
     }
 }
 
-void mergeLeft(int row[]) {
+static void mergeLeft(int row[]) {
     for (int j = 0; j < NCOLS - 1; j++) {
         if (row[j] != 0 && row[j] == row[j + 1]) {
             row[j] *= 2;
@@ -110,42 +145,8 @@ void mergeLeft(int row[]) {
 }
 
 // Core move function for each row to the left
-void moveRowLeft(int row[]) {
+static void moveRowLeft(int row[]) {
     shiftLeft(row);
     mergeLeft(row);
     shiftLeft(row);
-}
-
-void move(int matrix[], const game_direction_t action) {
-    switch (action) {
-        case LEFT:
-            for (int i = 0; i < NROWS; i++) {
-                moveRowLeft(&matrix[i * NCOLS]);
-            }
-            break;
-        case RIGHT:
-            reverseMatrix(matrix);
-            for (int i = 0; i < NROWS; i++) {
-                moveRowLeft(&matrix[i * NCOLS]);
-            }
-            reverseMatrix(matrix);
-            break;
-        case UP:
-            transposeMatrix(matrix);
-            for (int i = 0; i < NCOLS; i++) {
-                moveRowLeft(&matrix[i * NCOLS]);
-            }
-            transposeMatrix(matrix);
-            break;
-        case DOWN:
-            transposeMatrix(matrix);
-            reverseMatrix(matrix);
-            for (int i = 0; i < NCOLS; i++) {
-                moveRowLeft(&matrix[i * NCOLS]);
-            }
-            reverseMatrix(matrix);
-            transposeMatrix(matrix);
-            break;
-    }
-    addValue(matrix);
 }
