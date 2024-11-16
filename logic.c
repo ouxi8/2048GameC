@@ -106,6 +106,7 @@ int getScore() {
     return score;
 }
 
+//----------------------------------------------------------------//
 static void addValue(int matrix[]) {
     int emptyCells[NROWS * NCOLS];
     int emptyCount = 0;

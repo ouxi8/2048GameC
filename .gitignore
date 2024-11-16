@@ -1,0 +1,7 @@
+# Ignore 
+.idea
+cmake-build-debug
+
+# Un-ignore files or directories you want to keep
+!.gitignore
+

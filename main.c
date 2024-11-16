@@ -16,6 +16,7 @@ int main() {
 
     while (state == GAME_NOT_OVER) {
         printMatrix(matrix);
+        printf("Score: %d.\n", getScore());
 
         // Prompt for input
         printf("Enter move (W/A/S/D): ");
